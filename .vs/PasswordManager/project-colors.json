@@ -1,0 +1,16 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Różne pliki",
+      "ColorIndex": -1
+    },
+    "4a527a21-4572-44bd-b01e-132b3943b59c": {
+      "ProjectGuid": "4a527a21-4572-44bd-b01e-132b3943b59c",
+      "DisplayName": "PasswordManager",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}

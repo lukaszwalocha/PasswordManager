@@ -1,43 +1,15 @@
-﻿#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <unordered_map>
-#include <array>
-#include <sstream>
+#include "PasswordManager.h"
 
-class Decryptor {
-public:
-    ~Decryptor();
-    void setEncryptionMap();
-    void getPasswords();
 
-    void changeExistingPassword();
-    void addBrandNewPassword();
-    void saveExistingPasswords();
-
-    std::pair<std::string, std::string> encryptLabelPassword(const std::string& label, 
-        const std::string& password);
-
-    void logCommunicate(std::string str);
-
-private:
-    const std::string mainPassword{ "testPassword" };
-    const std::string dictionaryPath{ "D:/decryption/dictionary.txt" };
-    const std::string passwordFilePath{ "D:/decryption/encryptedPasswords.txt" };
-    std::unordered_map<char, std::string> encryptionMap;
-    std::unordered_map<std::string, std::string> passwordsMap;
-};
-
-Decryptor::~Decryptor() {
+PasswordManager::~PasswordManager() {
     this->saveExistingPasswords();
 }
 
-void Decryptor::logCommunicate(std::string str) {
+void PasswordManager::logCommunicate(std::string str) {
     std::cout << str;
 }
 
-void Decryptor::changeExistingPassword() {
+void PasswordManager::changeExistingPassword() {
     std::string labelName;
     std::getline(std::cin, labelName);
 
@@ -64,7 +36,7 @@ void Decryptor::changeExistingPassword() {
     }
 }
 
-void Decryptor::getPasswords() {
+void PasswordManager::getPasswords() {
     std::ifstream fileWithPasswords(passwordFilePath);
     std::string currentLine;
 
@@ -91,10 +63,10 @@ void Decryptor::getPasswords() {
     }
 }
 
-void Decryptor::setEncryptionMap() {
+void PasswordManager::setEncryptionMap() {
     std::ifstream dictionary(dictionaryPath);
     std::string currentLine;
-   
+
     while (std::getline(dictionary, currentLine)) {
         const auto letter = currentLine.front();
         std::string symbolsBuffer;
@@ -104,15 +76,16 @@ void Decryptor::setEncryptionMap() {
         }
         this->encryptionMap.insert(std::make_pair(letter, symbolsBuffer));
     }
+    int debugVar = 1000;
 }
 
-void Decryptor::addBrandNewPassword() {
-    std::vector<std::pair<std::string, std::string>> data{ 
-        {"Please type label name for the brand-new password: ", ""}, 
+void PasswordManager::addBrandNewPassword() {
+    std::vector<std::pair<std::string, std::string>> data{
+        {"Please type label name for the brand-new password: ", ""},
         {"Please type password: ",""},
         {"Please repeat password: ", ""} };
 
-    for (auto &element : data) {
+    for (auto& element : data) {
         logCommunicate(element.first);
         std::getline(std::cin, element.second);
     }
@@ -130,10 +103,41 @@ void Decryptor::addBrandNewPassword() {
     passwordsMap[data[0].second] = data[1].second;
 }
 
-std::pair<std::string, std::string> Decryptor::encryptLabelPassword(const std::string& label, 
+std::pair<std::string, std::string> PasswordManager::decryptLabelPassword(const std::string& label,
+    const std::string& password) {
+
+    std::string decryptedLabel, decryptedPassword, buffer;
+    int decryptionSymbolsAmount = 6, symbolsCounter = 0;
+
+    auto decryptElement = [&](const std::string& itemToDecrypt, std::string& decryptedOutput) {
+        for (const auto& letter : itemToDecrypt) {
+            if (symbolsCounter < decryptionSymbolsAmount) {
+                buffer += letter;
+            }
+            else {
+                symbolsCounter = 0;
+                auto outputElement = std::find_if(encryptionMap.begin(), encryptionMap.end(),
+                    [&buffer](const auto letterKeyElement) {return letterKeyElement.second == buffer; });
+                decryptedOutput += outputElement->first;
+                buffer.clear();
+            }
+        }
+        return decryptedOutput;
+    };
+    return std::make_pair(decryptElement(label, decryptedLabel),
+        decryptElement(password, decryptedPassword));
+}
+
+std::pair<std::string, std::string> PasswordManager::encryptLabelPassword(const std::string& label,
     const std::string& password) {
 
     std::string encryptedLabel, encryptedPassword;
+    auto encryptItem = [&](const std::string& decryptedItem, std::string& itemToEncrypt) {
+        for (const auto& letter : decryptedItem) {
+            itemToEncrypt += encryptionMap[letter];
+        }
+        return itemToEncrypt;
+    };
 
     for (const auto& letter : label) {
         encryptedLabel += encryptionMap[letter];
@@ -141,14 +145,14 @@ std::pair<std::string, std::string> Decryptor::encryptLabelPassword(const std::s
     for (const auto& letter : password) {
         encryptedPassword += encryptionMap[letter];
     }
-    return std::make_pair(encryptedLabel, encryptedPassword);
+    return std::make_pair(encryptItem(label, encryptedLabel), encryptItem(password, encryptedPassword));
 }
 
-void Decryptor::saveExistingPasswords() {
+void PasswordManager::saveExistingPasswords() {
     std::vector<std::pair<std::string, std::string>> encryptedPasswords;
     std::stringstream stream;
 
-    for (auto &[key, value] : passwordsMap) {
+    for (auto& [key, value] : passwordsMap) {
         std::pair<std::string, std::string> encryptedLabelPassword = encryptLabelPassword(key, value);
         stream << encryptedLabelPassword.first << ':' << encryptedLabelPassword.second;
     }
@@ -157,10 +161,4 @@ void Decryptor::saveExistingPasswords() {
     ofs.open(passwordFilePath, std::ofstream::out | std::ofstream::trunc);
     ofs << stream.str();
     ofs.close();
-}
-
-
-int main(){
-
-    return 0;
 }
