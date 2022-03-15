@@ -59,7 +59,8 @@ void PasswordManager::getPasswords() {
         if (this->passwordsMap.count(nameBuffer) > 0) {
             throw std::exception("Error. No name given.");
         }
-        this->passwordsMap[nameBuffer] = passwordBuffer;
+        auto labelPasswordDecrypted = decryptLabelPassword(nameBuffer, passwordBuffer);
+        this->passwordsMap[labelPasswordDecrypted.first] = labelPasswordDecrypted.second;
     }
 }
 
@@ -113,13 +114,14 @@ std::pair<std::string, std::string> PasswordManager::decryptLabelPassword(const 
         for (const auto& letter : itemToDecrypt) {
             if (symbolsCounter < decryptionSymbolsAmount) {
                 buffer += letter;
-            }
-            else {
-                symbolsCounter = 0;
-                auto outputElement = std::find_if(encryptionMap.begin(), encryptionMap.end(),
-                    [&buffer](const auto letterKeyElement) {return letterKeyElement.second == buffer; });
-                decryptedOutput += outputElement->first;
-                buffer.clear();
+                symbolsCounter++;
+                if (symbolsCounter == 6) {
+                    symbolsCounter = 0;
+                    auto outputElement = std::find_if(encryptionMap.begin(), encryptionMap.end(),
+                        [&buffer](const auto letterKeyElement) {return letterKeyElement.second == buffer; });
+                    decryptedOutput += outputElement->first;
+                    buffer.clear();
+                }
             }
         }
         return decryptedOutput;
@@ -138,13 +140,6 @@ std::pair<std::string, std::string> PasswordManager::encryptLabelPassword(const 
         }
         return itemToEncrypt;
     };
-
-    for (const auto& letter : label) {
-        encryptedLabel += encryptionMap[letter];
-    }
-    for (const auto& letter : password) {
-        encryptedPassword += encryptionMap[letter];
-    }
     return std::make_pair(encryptItem(label, encryptedLabel), encryptItem(password, encryptedPassword));
 }
 

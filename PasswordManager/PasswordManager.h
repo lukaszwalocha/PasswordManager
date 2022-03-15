@@ -27,7 +27,7 @@ public:
 private:
     const std::string mainPassword{ "testPassword" };
     const std::string dictionaryPath{ "D:/decryption/dictionary.txt" };
-    const std::string passwordFilePath{ "D:/decryption/encryptedPasswords.txt" };
+    const std::string passwordFilePath{ "D:/encryption/encryptedPasswords.txt" };
     std::unordered_map<char, std::string> encryptionMap;
     std::unordered_map<std::string, std::string> passwordsMap;
 };
