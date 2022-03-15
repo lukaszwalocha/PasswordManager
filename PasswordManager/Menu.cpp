@@ -2,6 +2,12 @@
 #include <limits>
 #include <iostream>
 #include <string>
+#include <cstdlib>
+
+void Menu::clearScreen()
+{
+	std::system("cls");
+}
 
 
 Menu::Menu() {
@@ -30,18 +36,22 @@ void Menu::displayMenu() {
 		printMenuStr();
 		switch (getUserChoice()) {
 		case 1:
+			clearScreen();
 			managerObject->getPasswords();
 			break;
 		case 2:
+			clearScreen();
 			managerObject->changeExistingPassword();
 			break;
 		case 3:
+			clearScreen();
 			managerObject->addBrandNewPassword();
 			break;
 		case 4:
 			isWorking = false;
 			break;
 		default:
+			clearScreen();
 			managerObject->getPasswords();
 			break;
 		}

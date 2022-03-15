@@ -39,9 +39,11 @@ void PasswordManager::changeExistingPassword() {
 }
 
 void PasswordManager::printPasswords() {
+    std::cout << "************************************\n************************************\n************************************\n";
     for (auto& [key, value] : passwordsMap) {
         std::cout << key << " : " << value << std::endl;
     }
+    std::cout << "************************************\n************************************\n************************************\n";
 }
 
 void PasswordManager::getPasswords() {

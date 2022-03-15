@@ -11,6 +11,7 @@ class Menu{
 		"4.End\n**********************";
 	bool isWorking{ true };
 	std::unique_ptr<PasswordManager> managerObject{ std::make_unique<PasswordManager>() };
+	void clearScreen();
 public:
 	Menu();
 	~Menu() = default;
