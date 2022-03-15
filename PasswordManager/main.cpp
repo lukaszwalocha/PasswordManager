@@ -7,9 +7,8 @@
 
 
 int main(){
-    std::unique_ptr<PasswordManager> manager = std::make_unique<PasswordManager>();
-    manager->setEncryptionMap();
-    manager->getPasswords();
+    std::unique_ptr<Menu> menuObject{ std::make_unique<Menu>() };
+    menuObject->displayMenu();
 
     return 0;
 }

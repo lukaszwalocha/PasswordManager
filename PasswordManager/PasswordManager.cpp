@@ -11,9 +11,10 @@ void PasswordManager::logCommunicate(std::string str) {
 
 void PasswordManager::changeExistingPassword() {
     std::string labelName;
+    logCommunicate("Please type existing label name: ");
     std::getline(std::cin, labelName);
 
-    if (this->passwordsMap.find(labelName) != passwordsMap.end()) {
+    if (!labelName.empty() && this->passwordsMap.find(labelName) != passwordsMap.end()) {
         logCommunicate("Please type new password: ");
         std::string newPassword;
         std::getline(std::cin, newPassword);
@@ -33,6 +34,13 @@ void PasswordManager::changeExistingPassword() {
     }
     else {
         logCommunicate("No such a label. Please create one first.\n");
+    }
+    saveExistingPasswords();
+}
+
+void PasswordManager::printPasswords() {
+    for (auto& [key, value] : passwordsMap) {
+        std::cout << key << " : " << value << std::endl;
     }
 }
 
@@ -62,22 +70,26 @@ void PasswordManager::getPasswords() {
         auto labelPasswordDecrypted = decryptLabelPassword(nameBuffer, passwordBuffer);
         this->passwordsMap[labelPasswordDecrypted.first] = labelPasswordDecrypted.second;
     }
+    printPasswords();
 }
 
 void PasswordManager::setEncryptionMap() {
     std::ifstream dictionary(dictionaryPath);
     std::string currentLine;
-
-    while (std::getline(dictionary, currentLine)) {
-        const auto letter = currentLine.front();
-        std::string symbolsBuffer;
-        auto colonPos = currentLine.find(":");
-        for (auto i = ++colonPos; i < currentLine.length(); i++) {
-            symbolsBuffer += currentLine[i];
+    try {
+        while (std::getline(dictionary, currentLine)) {
+            const auto letter = currentLine.front();
+            std::string symbolsBuffer;
+            auto colonPos = currentLine.find(":");
+            for (auto i = ++colonPos; i < currentLine.length(); i++) {
+                symbolsBuffer += currentLine[i];
+            }
+            this->encryptionMap.insert(std::make_pair(letter, symbolsBuffer));
         }
-        this->encryptionMap.insert(std::make_pair(letter, symbolsBuffer));
     }
-    int debugVar = 1000;
+    catch (std::exception& e) {
+        logCommunicate("Error. Cannot parse input file.\n");
+    }
 }
 
 void PasswordManager::addBrandNewPassword() {
@@ -149,7 +161,7 @@ void PasswordManager::saveExistingPasswords() {
 
     for (auto& [key, value] : passwordsMap) {
         std::pair<std::string, std::string> encryptedLabelPassword = encryptLabelPassword(key, value);
-        stream << encryptedLabelPassword.first << ':' << encryptedLabelPassword.second;
+        stream << encryptedLabelPassword.first << ':' << encryptedLabelPassword.second<< '\n';
     }
 
     std::ofstream ofs;

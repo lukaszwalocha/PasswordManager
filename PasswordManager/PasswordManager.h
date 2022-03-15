@@ -12,6 +12,7 @@ public:
     ~PasswordManager();
     void setEncryptionMap();
     void getPasswords();
+    void printPasswords();
 
     void changeExistingPassword();
     void addBrandNewPassword();
